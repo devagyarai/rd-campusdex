@@ -1,0 +1,334 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// USERS
+// ============================================================
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  password       String
+  role String      @default("STUDENT")
+  isActive       Boolean   @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  student              Student?
+  admin                Admin?
+  passwordResetTokens  PasswordResetToken[]
+  notifications        Notification[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+// ============================================================
+// PROFILES
+// ============================================================
+
+model Student {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  firstName      String
+  lastName       String
+  rollNumber     String    @unique
+  phone          String?
+  dateOfBirth    DateTime?
+  gender String?
+  address        String?   
+  profileImage   String?
+  department     String
+  semester       Int       @default(1)
+  batch          String
+  enrollmentDate DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendances         Attendance[]
+  assignmentSubmissions AssignmentSubmission[]
+  notes               Note[]
+
+  @@index([userId])
+  @@index([rollNumber])
+  @@index([department])
+  @@map("students")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  firstName    String
+  lastName     String
+  employeeId   String   @unique
+  phone        String?
+  designation  String
+  department   String
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notices  Notice[]
+  assignments Assignment[]
+
+  @@index([userId])
+  @@map("admins")
+}
+
+// ============================================================
+// ACADEMIC
+// ============================================================
+
+model Subject {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?  
+  credits     Int      @default(3)
+  department  String
+  semester    Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attendances  Attendance[]
+  timetables   Timetable[]
+  assignments  Assignment[]
+
+  @@index([code])
+  @@index([department])
+  @@map("subjects")
+}
+
+model Timetable {
+  id        String   @id @default(cuid())
+  subjectId String
+  day String
+  startTime String
+  endTime   String
+  room      String
+  semester  Int
+  batch     String
+  department String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([subjectId])
+  @@index([day])
+  @@index([semester])
+  @@map("timetables")
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  studentId String
+  subjectId String
+  date      DateTime         
+  status String @default("PRESENT")
+  remarks   String?
+  markedBy  String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, subjectId, date])
+  @@index([studentId])
+  @@index([subjectId])
+  @@index([date])
+  @@map("attendances")
+}
+
+// ============================================================
+// ASSIGNMENTS
+// ============================================================
+
+model Assignment {
+  id           String             @id @default(cuid())
+  title        String
+  description  String             
+  subjectId    String
+  adminId      String
+  dueDate      DateTime
+  totalMarks   Int                @default(100)
+  priority String @default("MEDIUM")
+  attachmentUrl String?
+  isPublished  Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  subject     Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  admin       Admin                 @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  submissions AssignmentSubmission[]
+
+  @@index([subjectId])
+  @@index([adminId])
+  @@index([dueDate])
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String           @id @default(cuid())
+  assignmentId String
+  studentId    String
+  status String @default("PENDING")
+  submittedAt  DateTime?
+  fileUrl      String?
+  remarks      String?          
+  marksObtained Int?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
+  @@map("assignment_submissions")
+}
+
+// ============================================================
+// NOTICES
+// ============================================================
+
+model Notice {
+  id          String         @id @default(cuid())
+  title       String
+  content     String         
+  category String @default("GENERAL")
+  adminId     String
+  isPinned    Boolean        @default(false)
+  isPublished Boolean        @default(true)
+  attachmentUrl String?
+  expiresAt   DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([category])
+  @@index([isPinned])
+  @@map("notices")
+}
+
+// ============================================================
+// NOTES
+// ============================================================
+
+model Note {
+  id        String       @id @default(cuid())
+  title     String
+  content   String       
+  category String @default("LECTURE")
+  studentId String
+  tags      String?
+  isPinned  Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  files   File[]
+
+  @@index([studentId])
+  @@index([category])
+  @@map("notes")
+}
+
+// ============================================================
+// FILES
+// ============================================================
+
+model File {
+  id           String   @id @default(cuid())
+  name         String
+  url          String
+  type         String
+  size         Int?
+  noteId       String?
+  uploadedBy   String
+  createdAt    DateTime @default(now())
+
+  note Note? @relation(fields: [noteId], references: [id], onDelete: SetNull)
+
+  @@index([noteId])
+  @@map("files")
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String   
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+// ============================================================
+// PASSWORD RESET
+// ============================================================
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
