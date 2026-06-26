@@ -198,9 +198,9 @@ async function main() {
   usedRolls.add("CS2022001");
   console.log("  ✅ Demo student: student1@campusdex.com");
 
-  // 49 more students
+  // 4 more students (total 5)
   let studentNum = 2;
-  while (students.length < 50) {
+  while (students.length < 5) {
     const firstName = randomFrom(FIRST_NAMES);
     const lastName = randomFrom(LAST_NAMES);
     const dept = randomFrom(DEPARTMENTS);
@@ -256,7 +256,7 @@ async function main() {
     const assignment = await prisma.assignment.create({
       data: {
         title: template.title,
-        description: template.description,
+        description: template.description.substring(0, 190),
         subjectId: subject.id,
         adminId: admin.id,
         dueDate,
@@ -269,7 +269,7 @@ async function main() {
   }
 
   // More assignments from templates
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < 5; i++) {
     const subject = randomFrom(csSubjectsAll);
     const admin = randomFrom(admins);
     const isPast = Math.random() > 0.4;
@@ -278,8 +278,8 @@ async function main() {
 
     const assignment = await prisma.assignment.create({
       data: {
-        title: `${template.title} - Part ${i + 1}`,
-        description: template.description,
+        title: `${template.title} - Part ${i + 1}`.substring(0, 190),
+        description: template.description.substring(0, 190),
         subjectId: subject.id,
         adminId: admin.id,
         dueDate,
@@ -297,8 +297,8 @@ async function main() {
   const statuses = ["PENDING", "IN_PROGRESS", "COMPLETED", "OVERDUE"];
   let submissionCount = 0;
 
-  for (const student of students.slice(0, 20)) {
-    for (const assignment of createdAssignments.slice(0, 5)) {
+  for (const student of students.slice(0, 5)) {
+    for (const assignment of createdAssignments.slice(0, 3)) {
       try {
         const status = randomFrom(statuses);
         await prisma.assignmentSubmission.create({
@@ -323,18 +323,18 @@ async function main() {
 
   for (const n of NOTICE_DATA) {
     await prisma.notice.create({
-      data: { ...n, adminId: mainAdmin.id },
+      data: { ...n, content: n.content.substring(0, 190), adminId: mainAdmin.id },
     });
     noticeCount++;
   }
 
   // More notices
   const moreNoticeCategories = ["ACADEMIC", "EVENT", "GENERAL"] ;
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < 5; i++) {
     await prisma.notice.create({
       data: {
-        title: `Campus Update #${i + 9}: ${["Seminar", "Workshop", "Announcement", "Reminder", "Alert"][i % 5]}`,
-        content: `This is an important campus notice regarding activities scheduled for the upcoming weeks. Students are requested to take note and act accordingly. Please check the official portal for more details and updates. Contact the administrative office for any queries.`,
+        title: `Campus Update #${i + 9}: ${["Seminar", "Workshop", "Announcement", "Reminder", "Alert"][i % 5]}`.substring(0, 190),
+        content: `This is an important campus notice regarding activities. Students are requested to take note.`.substring(0, 190),
         category: randomFrom(moreNoticeCategories),
         isPinned: Math.random() > 0.85,
         adminId: randomFrom(admins).id,
@@ -352,9 +352,9 @@ async function main() {
   const attSubjects = subjects.filter(s => s.department === "Computer Science" && s.semester === 5);
   const attStudents = students.filter(s => s.department === "Computer Science");
 
-  for (const student of attStudents.slice(0, 10)) {
-    for (const subject of attSubjects) {
-      for (let dayOffset = 90; dayOffset >= 0; dayOffset -= 3) {
+  for (const student of attStudents.slice(0, 5)) {
+    for (const subject of attSubjects.slice(0, 2)) {
+      for (let dayOffset = 30; dayOffset >= 0; dayOffset -= 5) {
         const date = new Date();
         date.setDate(date.getDate() - dayOffset);
         const dayOfWeek = date.getDay();
@@ -393,7 +393,7 @@ async function main() {
 
   for (const note of notesData) {
     await prisma.note.create({
-      data: { ...note, studentId: demoStudent.id },
+      data: { ...note, content: note.content.substring(0, 190), studentId: demoStudent.id },
     });
   }
   console.log("  ✅ Sample notes created for demo student");
