@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npx prisma generate && npx prisma db push --accept-data-loss && next build",
+  "buildCommand": "npx prisma@5 generate && npx prisma@5 db push --accept-data-loss && next build",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs"
 }
