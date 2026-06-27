@@ -70,44 +70,38 @@ const features = [
   },
 ];
 
-const stats = [
-  { value: "10K+", label: "Students", icon: Users },
-  { value: "500+", label: "Institutions", icon: Globe },
-  { value: "98%", label: "Uptime", icon: Zap },
-  { value: "4.9★", label: "Rating", icon: Star },
+const technicalHighlights = [
+  { value: "JWT", label: "Authentication", icon: Shield },
+  { value: "RBAC", label: "Access Control", icon: Users },
+  { value: "Live", label: "Real-Time Updates", icon: Zap },
+  { value: "Audit", label: "Security Logs", icon: ClipboardList },
 ];
 
-const testimonials = [
+const whyChooseUs = [
   {
-    name: "Dr. Priya Sharma",
-    role: "HOD, Computer Science",
-    college: "IIT Bombay",
-    content: "CampusDex transformed how we manage our department. Attendance tracking alone saved us 3 hours per week.",
-    avatar: "PS",
+    title: "Production-Ready Architecture",
+    description: "Built on Next.js App Router with TypeScript, integrating a fully normalized MySQL relational database design for reliable data integrity.",
+    icon: Sparkles,
     color: "from-violet-500 to-purple-600",
   },
   {
-    name: "Rahul Mehta",
-    role: "Final Year Student",
-    college: "NIT Trichy",
-    content: "Finally a platform that feels modern. I can track all my assignments, attendance, and notes in one place.",
-    avatar: "RM",
+    title: "Enterprise-Grade Security",
+    description: "Implements strict Role-Based Access Control (RBAC) with protected middleware, secure JWT sessions, and comprehensive audit logging.",
+    icon: Shield,
     color: "from-blue-500 to-cyan-600",
   },
   {
-    name: "Prof. Anjali Nair",
-    role: "Principal",
-    college: "BITS Pilani",
-    content: "The analytics dashboard gives us insights we never had before. Student performance has improved by 23%.",
-    avatar: "AN",
+    title: "Real-Time Infrastructure",
+    description: "Event-driven WebSocket architecture utilizing Pusher for instant live notifications, notices, and activity feeds across dashboards.",
+    icon: Zap,
     color: "from-emerald-500 to-teal-600",
   },
 ];
 
 const navLinks = [
   { label: "Features", href: "#features" },
-  { label: "About", href: "#stats" },
-  { label: "Testimonials", href: "#testimonials" },
+  { label: "Highlights", href: "#highlights" },
+  { label: "Architecture", href: "#architecture" },
 ];
 
 export default function LandingPage() {
@@ -275,11 +269,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section id="stats" className="py-24 border-y border-white/5 bg-white/[0.02]">
+      {/* Technical Highlights Section */}
+      <section id="highlights" className="py-24 border-y border-white/5 bg-white/[0.02]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, i) => (
+            {technicalHighlights.map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
@@ -339,8 +333,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="py-24 border-t border-white/5 bg-white/[0.02]">
+      {/* Architecture / Why Choose Us */}
+      <section id="architecture" className="py-24 border-t border-white/5 bg-white/[0.02]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -349,36 +343,28 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4">
-              Loved by <span className="gradient-text">Educators</span>
+              Why <span className="gradient-text">RD CampusDex?</span>
             </h2>
-            <p className="text-gray-400 text-lg">Trusted by institutions across India</p>
+            <p className="text-gray-400 text-lg">Engineered for reliability, security, and scale.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+            {whyChooseUs.map((item, i) => (
               <motion.div
-                key={t.name}
+                key={item.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
-                className="p-6 rounded-2xl border border-white/5 bg-white/[0.03]"
+                className="p-6 rounded-2xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-300"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm`}>
-                    {t.avatar}
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center text-white`}>
+                    <item.icon className="w-5 h-5" />
                   </div>
-                  <div>
-                    <div className="font-semibold text-sm">{t.name}</div>
-                    <div className="text-gray-500 text-xs">{t.role} · {t.college}</div>
-                  </div>
+                  <div className="font-semibold text-sm">{item.title}</div>
                 </div>
-                <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-400 text-sm leading-relaxed">&quot;{t.content}&quot;</p>
+                <p className="text-gray-400 text-sm leading-relaxed">{item.description}</p>
               </motion.div>
             ))}
           </div>
@@ -397,10 +383,10 @@ export default function LandingPage() {
               <div className="absolute inset-0 hero-grid opacity-20" />
               <div className="relative">
                 <h2 className="text-4xl font-bold mb-4">
-                  Ready to Transform Your Campus?
+                  Ready to Explore the Portal?
                 </h2>
                 <p className="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
-                  Join thousands of students and educators already using RD CampusDex.
+                  Experience the full engineering capabilities of RD CampusDex.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Link
