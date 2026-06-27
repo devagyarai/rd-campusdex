@@ -23,17 +23,23 @@ export async function signToken(payload: Omit<JWTPayload, "iat" | "exp">): Promi
     .sign(JWT_SECRET);
 }
 
-export async function verifyToken(token: string): Promise<JWTPayload | null> {
+export async function verifyToken(token: string, skipSessionValidation = false): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     const decoded = payload as unknown as JWTPayload;
     
-    // Validate sessionVersion
-    const isValid = await validateSessionVersion(decoded.userId, decoded.sessionVersion);
-    if (!isValid) return null;
+    // Validate sessionVersion if not skipping
+    if (!skipSessionValidation) {
+      const isValid = await validateSessionVersion(decoded.userId, decoded.sessionVersion);
+      if (!isValid) {
+        console.log("[verifyToken] validateSessionVersion returned false");
+        return null;
+      }
+    }
 
     return decoded;
-  } catch {
+  } catch (err) {
+    console.error("[verifyToken] error:", err);
     return null;
   }
 }
@@ -49,10 +55,10 @@ export async function getSession(): Promise<JWTPayload | null> {
   }
 }
 
-export async function getSessionFromRequest(req: NextRequest): Promise<JWTPayload | null> {
+export async function getSessionFromRequest(req: NextRequest, skipSessionValidation = false): Promise<JWTPayload | null> {
   const token = req.cookies.get("campusdex-token")?.value;
   if (!token) return null;
-  return await verifyToken(token);
+  return await verifyToken(token, skipSessionValidation);
 }
 
 export function setTokenCookie(token: string, response: Response): void {

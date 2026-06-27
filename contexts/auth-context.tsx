@@ -43,9 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data.user);
       } else {
         setUser(null);
+        if (!window.location.pathname.startsWith("/auth") && window.location.pathname !== "/") {
+          router.push("/auth/login");
+        }
       }
     } catch {
       setUser(null);
+      if (!window.location.pathname.startsWith("/auth") && window.location.pathname !== "/") {
+        router.push("/auth/login");
+      }
     } finally {
       setLoading(false);
     }

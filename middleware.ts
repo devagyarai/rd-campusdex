@@ -20,7 +20,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = await getSessionFromRequest(request);
+  // Skip DB session validation in Edge middleware
+  const session = await getSessionFromRequest(request, true);
 
   // Not authenticated
   if (!session) {
