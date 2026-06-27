@@ -11,7 +11,6 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json', 'lcov'],
-      all: true,
       include: ['app/**/*.ts', 'app/**/*.tsx', 'components/**/*.ts', 'components/**/*.tsx', 'lib/**/*.ts'],
       exclude: ['node_modules', 'tests', '**/*.d.ts', '**/*.test.ts', '**/*.test.tsx'],
       thresholds: {

@@ -44,6 +44,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "^4.1.9",
     "autocannon": "^8.0.0",
     "fast-check": "^4.8.0",
