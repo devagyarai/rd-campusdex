@@ -46,17 +46,17 @@ describe('POST /api/auth/login', () => {
       email: 'student@test.com',
       password: hash,
       role: 'STUDENT',
-      name: 'Test User',
+      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-      status: 'ACTIVE',
       storageQuota: 100,
       storageUsed: 0,
       resetPasswordToken: null,
       resetPasswordExpires: null,
       lastPasswordReset: null,
+      lastLoginAt: null,
       sessionVersion: 1
-    });
+    } as any);
 
     const req = new Request('http://localhost/api/auth/login', {
       method: 'POST',
@@ -67,6 +67,6 @@ describe('POST /api/auth/login', () => {
     expect(res.status).toBe(200);
     
     const setCookie = res.headers.get('set-cookie');
-    expect(setCookie).toContain('campusdex_session');
+    expect(setCookie).toContain('campusdex-token');
   });
 });

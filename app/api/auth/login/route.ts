@@ -30,7 +30,13 @@ export async function POST(req: Request) {
       },
     });
 
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const userAgent = req.headers.get("user-agent") || "unknown";
+
     if (!user || !user.isActive) {
+      await db.securityAuditLog.create({
+        data: { email, ipAddress: ip, userAgent, action: "failed_login_invalid_email" },
+      });
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -39,6 +45,9 @@ export async function POST(req: Request) {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      await db.securityAuditLog.create({
+        data: { email, userId: user.id, ipAddress: ip, userAgent, action: "failed_login_invalid_password" },
+      });
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -49,6 +58,10 @@ export async function POST(req: Request) {
     await db.user.update({
       where: { id: user.id },
       data: { lastLoginAt: new Date() },
+    });
+    
+    await db.securityAuditLog.create({
+      data: { email, userId: user.id, ipAddress: ip, userAgent, action: "successful_login" },
     });
 
     const token = await signToken({

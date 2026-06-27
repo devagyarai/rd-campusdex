@@ -51,6 +51,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const { pusherServer } = await import("@/lib/pusher");
+    await pusherServer.trigger('campus-channel', 'new-notice', notice);
+
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const userAgent = req.headers.get("user-agent") || "unknown";
+    await db.securityAuditLog.create({
+      data: {
+        userId: session.userId,
+        email: session.email,
+        ipAddress: ip,
+        userAgent,
+        action: `admin_created_notice_${notice.id}`,
+      },
+    });
+
     return NextResponse.json(notice, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

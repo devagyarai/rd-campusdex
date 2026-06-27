@@ -11,6 +11,7 @@ import {
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
+import { PusherListener } from "@/components/PusherListener";
 
 const navItems = [
   { href: "/student/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -160,6 +161,7 @@ export function StudentLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      <PusherListener role="STUDENT" />
     </div>
   );
 }

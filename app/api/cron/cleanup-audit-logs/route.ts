@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { verifyInternalRequest } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!verifyInternalRequest(req)) {
       return new Response("Unauthorized", { status: 401 });
     }
 

@@ -8,7 +8,12 @@ const envSchema = z.object({
   CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET is required'),
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().min(1, 'NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is required'),
   NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: z.string().min(1, 'NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET is required'),
+  CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters').optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PUSHER_APP_ID: z.string().min(1, 'PUSHER_APP_ID is required').optional(),
+  PUSHER_SECRET: z.string().min(1, 'PUSHER_SECRET is required').optional(),
+  NEXT_PUBLIC_PUSHER_KEY: z.string().min(1, 'NEXT_PUBLIC_PUSHER_KEY is required').optional(),
+  NEXT_PUBLIC_PUSHER_CLUSTER: z.string().min(1, 'NEXT_PUBLIC_PUSHER_CLUSTER is required').optional(),
 });
 
 const parseEnv = () => {

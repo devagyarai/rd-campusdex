@@ -74,6 +74,9 @@ export async function POST(req: Request) {
       },
     });
 
+    const { invalidateUserSessionCache } = await import("@/lib/auth");
+    invalidateUserSessionCache(user.id);
+
     await sendPasswordChangedEmail(user.email);
 
     await db.securityAuditLog.create({

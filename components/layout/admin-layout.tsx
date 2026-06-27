@@ -7,11 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, LayoutDashboard, Users, ClipboardCheck, Calendar,
   Bell, BookOpen, BarChart3, User, LogOut, Menu, Sun, Moon, ChevronRight,
-  TrendingUp,
+  TrendingUp, ShieldAlert,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
+import { PusherListener } from "@/components/PusherListener";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/admin/assignments", icon: BookOpen, label: "Assignments" },
   { href: "/admin/notices", icon: Bell, label: "Notices" },
   { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/admin/audit", icon: ShieldAlert, label: "Audit Logs" },
   { href: "/admin/profile", icon: User, label: "Profile" },
 ];
 
@@ -155,6 +157,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      <PusherListener role="ADMIN" />
     </div>
   );
 }

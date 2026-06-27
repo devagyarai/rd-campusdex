@@ -30,7 +30,13 @@ export async function POST(req: NextRequest) {
     if (!isValid) return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
-    await db.user.update({ where: { id: user.id }, data: { password: hashedPassword } });
+    await db.user.update({ 
+      where: { id: user.id }, 
+      data: { password: hashedPassword, sessionVersion: { increment: 1 } } 
+    });
+
+    const { invalidateUserSessionCache } = await import("@/lib/auth");
+    invalidateUserSessionCache(user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
