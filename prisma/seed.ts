@@ -97,7 +97,7 @@ async function main() {
   await prisma.subject.deleteMany();
   await prisma.student.deleteMany();
   await prisma.admin.deleteMany();
-  await prisma.passwordResetToken.deleteMany();
+  await prisma.securityAuditLog.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.user.deleteMany();
 

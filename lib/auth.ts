@@ -10,6 +10,7 @@ export interface JWTPayload {
   userId: string;
   email: string;
   role: "STUDENT" | "ADMIN";
+  sessionVersion: number;
   iat?: number;
   exp?: number;
 }

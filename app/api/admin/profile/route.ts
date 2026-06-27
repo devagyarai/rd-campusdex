@@ -21,6 +21,8 @@ export async function PUT(req: NextRequest) {
         firstName: body.firstName,
         lastName: body.lastName,
         phone: body.phone,
+        profileImage: body.profileImage,
+        profileImageId: body.profileImageId,
       },
     });
 

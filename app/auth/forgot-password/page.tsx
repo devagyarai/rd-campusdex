@@ -107,13 +107,14 @@ export default function ForgotPasswordPage() {
               <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6">
                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">Check your email</h1>
+              <h1 className="text-2xl font-bold text-white mb-2">Request Received</h1>
               <p className="text-gray-400 text-sm mb-6">
-                We sent a password reset link to{" "}
-                <span className="text-violet-400">{sentTo}</span>
+                If an account exists for{" "}
+                <span className="text-violet-400">{sentTo}</span>, 
+                a password reset link has been sent.
               </p>
               <p className="text-xs text-gray-500 mb-6">
-                Note: In development, check the server console for the reset token.
+                Please check your inbox and spam folder.
               </p>
               <Link
                 href="/auth/login"

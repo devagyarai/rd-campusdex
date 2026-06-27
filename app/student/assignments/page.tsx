@@ -6,8 +6,10 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Clock, AlertCircle, CheckCircle2, Filter, Search } from "lucide-react";
+import { BookOpen, Clock, AlertCircle, CheckCircle2, Filter, Search, X } from "lucide-react";
 import { toast } from "sonner";
+import { FileDropzone } from "@/components/upload/FileDropzone";
+import { AnimatePresence } from "framer-motion";
 
 interface Assignment {
   id: string;
@@ -42,6 +44,9 @@ export default function StudentAssignmentsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [priorityFilter, setPriorityFilter] = useState("ALL");
+  const [submitModal, setSubmitModal] = useState<Assignment | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<any>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchAssignments = async () => {
     try {
@@ -54,20 +59,31 @@ export default function StudentAssignmentsPage() {
 useEffect(() => { fetchAssignments(); }, []);
 
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: string, fileId?: string) => {
     try {
       const res = await fetch(`/api/student/assignments/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, fileId }),
       });
       if (res.ok) {
         setAssignments(prev => prev.map(a =>
           a.id === id ? { ...a, status: status as Assignment["status"] } : a
         ));
-        toast.success("Status updated");
+        toast.success(status === "COMPLETED" ? "Assignment submitted" : "Status updated");
+        if (status === "COMPLETED") {
+          setSubmitModal(null);
+          setUploadedFile(null);
+        }
       }
     } catch { toast.error("Failed to update status"); }
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!submitModal) return;
+    setSubmitting(true);
+    await updateStatus(submitModal.id, "COMPLETED", uploadedFile?.id);
+    setSubmitting(false);
   };
 
   const counts = {
@@ -222,10 +238,10 @@ useEffect(() => { fetchAssignments(); }, []);
                       </button>
                     )}
                     <button
-                      onClick={() => updateStatus(assignment.id, "COMPLETED")}
+                      onClick={() => setSubmitModal(assignment)}
                       className="flex-1 py-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-colors"
                     >
-                      Mark Complete
+                      Submit
                     </button>
                   </div>
                 )}
@@ -239,6 +255,71 @@ useEffect(() => { fetchAssignments(); }, []);
           })}
         </div>
       )}
+
+      {/* Submission Modal */}
+      <AnimatePresence>
+        {submitModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setSubmitModal(null); setUploadedFile(null); }}
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 max-w-lg mx-auto bg-card border border-border rounded-2xl p-6 shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="font-bold text-lg">Submit Assignment</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{submitModal.title}</p>
+                </div>
+                <button onClick={() => { setSubmitModal(null); setUploadedFile(null); }} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {!uploadedFile ? (
+                <FileDropzone
+                  folder="assignments"
+                  maxSizeMB={50}
+                  allowedExtensions={["pdf", "doc", "docx", "zip", "rar", "ppt", "pptx"]}
+                  onUploadComplete={setUploadedFile}
+                />
+              ) : (
+                <div className="bg-accent p-4 rounded-xl border border-border">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                    <div>
+                      <p className="font-medium">{uploadedFile.originalName}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Ready to submit</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button 
+                      onClick={() => setUploadedFile(null)}
+                      className="flex-1 py-2 bg-card border border-border rounded-lg text-sm font-medium hover:bg-accent transition-colors"
+                    >
+                      Change File
+                    </button>
+                    <button 
+                      onClick={handleFinalSubmit}
+                      disabled={submitting}
+                      className="flex-1 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                    >
+                      {submitting ? "Submitting..." : "Confirm Submit"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -21,7 +21,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         category: body.category,
         tags: body.tags,
         isPinned: body.isPinned,
+        files: body.fileIds && body.fileIds.length > 0 ? {
+          connect: body.fileIds.map((id: string) => ({ id }))
+        } : undefined
       },
+      include: { files: true }
     });
 
     return NextResponse.json(note);

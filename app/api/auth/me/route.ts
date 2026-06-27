@@ -22,6 +22,10 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    if (user.sessionVersion !== session.sessionVersion) {
+      return NextResponse.json({ error: "Session expired" }, { status: 401 });
+    }
+
     const { password, ...userWithoutPassword } = user;
     return NextResponse.json({ user: userWithoutPassword });
   } catch (error) {

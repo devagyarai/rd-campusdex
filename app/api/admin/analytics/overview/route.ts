@@ -16,12 +16,18 @@ export async function GET() {
       totalAttendance,
       totalAssignments,
       totalNotices,
+      totalStorageAgg,
+      totalActiveFiles,
     ] = await Promise.all([
       db.student.count(),
       db.attendance.count(),
       db.assignment.count(),
       db.notice.count(),
+      db.user.aggregate({ _sum: { storageUsed: true } }),
+      db.cloudFile.count({ where: { state: "ACTIVE" } })
     ]);
+
+    const totalStorageUsed = totalStorageAgg._sum.storageUsed || 0;
 
     // Calculate attendance rate
     const presentCount = await db.attendance.count({ where: { status: "PRESENT" } });
@@ -120,6 +126,8 @@ export async function GET() {
       totalAttendance,
       totalAssignments,
       totalNotices,
+      totalStorageUsed,
+      totalActiveFiles,
       attendanceRate,
       newStudentsThisMonth,
       monthlyAttendance: months,

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users, ClipboardCheck, BookOpen, Bell, TrendingUp, TrendingDown,
-  GraduationCap, Activity, BarChart3,
+  GraduationCap, Activity, BarChart3, Cloud,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -20,6 +20,7 @@ interface AdminStats {
   totalAttendance: number;
   totalAssignments: number;
   totalNotices: number;
+  totalStorageUsed: number;
   attendanceRate: number;
   newStudentsThisMonth: number;
   monthlyAttendance: { month: string; rate: number }[];
@@ -37,8 +38,16 @@ const statCards = [
   { key: "totalAssignments", label: "Assignments", icon: BookOpen, gradient: "from-emerald-500 to-teal-600", suffix: "" },
   { key: "totalNotices", label: "Notices", icon: Bell, gradient: "from-orange-500 to-amber-600", suffix: "" },
   { key: "attendanceRate", label: "Avg Attendance", icon: Activity, gradient: "from-rose-500 to-pink-600", suffix: "%" },
-  { key: "newStudentsThisMonth", label: "New This Month", icon: TrendingUp, gradient: "from-indigo-500 to-blue-600", suffix: "" },
+  { key: "totalStorageUsed", label: "Storage Used", icon: Cloud, gradient: "from-slate-500 to-gray-600", suffix: "" },
 ];
+
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -95,7 +104,7 @@ useEffect(() => { fetchStats(); }, []);
                   <card.icon className="w-5 h-5 text-white" />
                 </div>
               </div>
-              <div className="text-3xl font-bold">{String(value ?? 0)}{card.suffix}</div>
+              <div className="text-3xl font-bold">{card.key === "totalStorageUsed" ? formatBytes(Number(value) || 0) : String(value ?? 0)}{card.suffix}</div>
               <div className="text-sm text-muted-foreground mt-1">{card.label}</div>
             </motion.div>
           );

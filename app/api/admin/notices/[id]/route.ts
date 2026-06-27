@@ -21,8 +21,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         category: body.category,
         isPinned: Boolean(body.isPinned),
         expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
+        attachmentId: body.attachmentId !== undefined ? body.attachmentId : undefined,
       },
-      include: { admin: { select: { firstName: true, lastName: true } } },
+      include: { 
+        admin: { select: { firstName: true, lastName: true } },
+        attachment: true
+      },
     });
     return NextResponse.json(notice);
   } catch (error) {

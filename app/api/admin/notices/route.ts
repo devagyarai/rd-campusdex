@@ -13,7 +13,10 @@ export async function GET(req: NextRequest) {
     if (!session || session.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const notices = await db.notice.findMany({
-      include: { admin: { select: { firstName: true, lastName: true } } },
+      include: { 
+        admin: { select: { firstName: true, lastName: true } },
+        attachment: true
+      },
       orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
     });
 
@@ -40,8 +43,12 @@ export async function POST(req: NextRequest) {
         isPinned: Boolean(body.isPinned),
         adminId: admin.id,
         expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
+        attachmentId: body.attachmentId,
       },
-      include: { admin: { select: { firstName: true, lastName: true } } },
+      include: { 
+        admin: { select: { firstName: true, lastName: true } },
+        attachment: true
+      },
     });
 
     return NextResponse.json(notice, { status: 201 });

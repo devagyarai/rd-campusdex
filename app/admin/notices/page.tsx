@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Plus, Pencil, Trash2, Pin, Search, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
+import { FileDropzone } from "@/components/upload/FileDropzone";
+import { CloudFileDTO, MediaGallery } from "@/components/upload/MediaGallery";
 
 interface Notice {
   id: string;
@@ -19,6 +21,7 @@ interface Notice {
   isPublished: boolean;
   createdAt: string;
   admin: { firstName: string; lastName: string };
+  attachment?: CloudFileDTO;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -45,6 +48,7 @@ export default function AdminNoticesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
   const [saving, setSaving] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<CloudFileDTO | null>(null);
 
   const { register, handleSubmit, reset, setValue } = useForm<NoticeForm>({
     defaultValues: { category: "GENERAL", isPinned: false }
@@ -63,12 +67,14 @@ useEffect(() => { fetchNotices(); }, []);
 
   const openCreate = () => {
     setEditingNotice(null);
+    setAttachedFile(null);
     reset({ title: "", content: "", category: "GENERAL", isPinned: false, expiresAt: "" });
     setModalOpen(true);
   };
 
   const openEdit = (n: Notice) => {
     setEditingNotice(n);
+    setAttachedFile(n.attachment || null);
     setValue("title", n.title);
     setValue("content", n.content);
     setValue("category", n.category);
@@ -84,7 +90,7 @@ useEffect(() => { fetchNotices(); }, []);
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, attachmentId: attachedFile?.id || null }),
       });
       if (res.ok) {
         toast.success(editingNotice ? "Notice updated" : "Notice published");
@@ -226,6 +232,23 @@ useEffect(() => { fetchNotices(); }, []);
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Content</label>
                   <textarea {...register("content", { required: true })} rows={5} placeholder="Notice content..." className="w-full px-3 py-2 bg-accent border border-border rounded-lg text-sm focus:outline-none resize-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Attachment (Optional)</label>
+                  {attachedFile ? (
+                    <MediaGallery 
+                      files={[attachedFile]} 
+                      onDelete={() => setAttachedFile(null)} 
+                      className="mb-4"
+                    />
+                  ) : (
+                    <FileDropzone
+                      folder="notices"
+                      maxSizeMB={20}
+                      allowedExtensions={["pdf", "doc", "docx", "jpg", "png"]}
+                      onUploadComplete={setAttachedFile}
+                    />
+                  )}
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input {...register("isPinned")} type="checkbox" className="w-4 h-4 rounded" />

@@ -10,6 +10,7 @@ import { User, Camera, Lock, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { useForm } from "react-hook-form";
+import { FileDropzone } from "@/components/upload/FileDropzone";
 
 interface ProfileData {
   firstName: string;
@@ -28,7 +29,7 @@ interface ProfileData {
 export default function StudentProfilePage() {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [showUploader, setShowUploader] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
 
   const { register, handleSubmit, reset } = useForm<ProfileData>();
@@ -97,28 +98,26 @@ export default function StudentProfilePage() {
     finally { setLoading(false); }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingImage(true);
+  const handleUploadComplete = async (fileData: any) => {
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const res = await fetch("/api/student/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          profileImage: fileData.secureUrl,
+          profileImageId: fileData.id
+        }),
+      });
       if (res.ok) {
-        const { url } = await res.json();
-        await fetch("/api/student/profile", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ profileImage: url }),
-        });
         toast.success("Profile picture updated");
+        setShowUploader(false);
         refreshUser();
       } else {
-        toast.error("Upload failed. Check Cloudinary configuration.");
+        toast.error("Failed to save profile picture to database.");
       }
-    } catch { toast.error("Upload failed"); }
-    finally { setUploadingImage(false); }
+    } catch {
+      toast.error("An error occurred while saving the profile picture.");
+    }
   };
 
   return (
@@ -144,14 +143,12 @@ export default function StudentProfilePage() {
                 initials
               )}
             </div>
-            <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity shadow-lg">
-              {uploadingImage ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Camera className="w-4 h-4" />
-              )}
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploadingImage} />
-            </label>
+            <button 
+              onClick={() => setShowUploader(true)}
+              className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity shadow-lg"
+            >
+              <Camera className="w-4 h-4" />
+            </button>
           </div>
           <div>
             <h2 className="text-xl font-bold">
@@ -265,6 +262,30 @@ export default function StudentProfilePage() {
             </button>
           </form>
         </motion.div>
+      )}
+      {showUploader && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[var(--background)] rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col"
+          >
+            <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
+              <h3 className="font-semibold text-[var(--text-primary)]">Upload Profile Picture</h3>
+              <button onClick={() => setShowUploader(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <FileDropzone 
+                folder="profiles" 
+                maxSizeMB={5}
+                allowedExtensions={["jpg", "jpeg", "png", "webp"]}
+                onUploadComplete={handleUploadComplete}
+              />
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

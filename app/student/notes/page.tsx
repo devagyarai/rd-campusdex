@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Plus, Search, Pin, Pencil, Trash2, X, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
+import { FileDropzone } from "@/components/upload/FileDropzone";
+import { MediaGallery, CloudFileDTO } from "@/components/upload/MediaGallery";
 
 interface Note {
   id: string;
@@ -19,6 +21,7 @@ interface Note {
   isPinned: boolean;
   createdAt: string;
   updatedAt: string;
+  files?: CloudFileDTO[];
 }
 
 const CATEGORIES = ["ALL", "LECTURE", "STUDY", "PERSONAL", "PROJECT", "RESEARCH", "OTHER"];
@@ -39,6 +42,7 @@ export default function StudentNotesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [saving, setSaving] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<CloudFileDTO[]>([]);
 
   const { register, handleSubmit, reset, setValue } = useForm<{
     title: string; content: string; category: string; tags: string;
@@ -57,12 +61,14 @@ useEffect(() => { fetchNotes(); }, []);
 
   const openCreate = () => {
     setEditingNote(null);
+    setAttachedFiles([]);
     reset({ title: "", content: "", category: "LECTURE", tags: "" });
     setIsModalOpen(true);
   };
 
   const openEdit = (note: Note) => {
     setEditingNote(note);
+    setAttachedFiles(note.files || []);
     setValue("title", note.title);
     setValue("content", note.content);
     setValue("category", note.category);
@@ -78,7 +84,7 @@ useEffect(() => { fetchNotes(); }, []);
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, fileIds: attachedFiles.map(f => f.id) }),
       });
       if (res.ok) {
         toast.success(editingNote ? "Note updated" : "Note created");
@@ -210,6 +216,11 @@ useEffect(() => { fetchNotes(); }, []);
                   ))}
                 </div>
               )}
+              {note.files && note.files.length > 0 && (
+                <div className="mb-3 text-xs text-muted-foreground flex items-center gap-1">
+                  <FileText className="w-3 h-3" /> {note.files.length} attachment(s)
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
                   {new Date(note.updatedAt).toLocaleDateString()}
@@ -289,6 +300,22 @@ useEffect(() => { fetchNotes(); }, []);
                     {...register("tags")}
                     placeholder="math, calculus, lecture"
                     className="w-full px-3 py-2 bg-accent border border-border rounded-lg text-sm focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Attachments</label>
+                  {attachedFiles.length > 0 && (
+                    <MediaGallery 
+                      files={attachedFiles} 
+                      className="mb-4"
+                      onDelete={(id) => setAttachedFiles(prev => prev.filter(f => f.id !== id))}
+                    />
+                  )}
+                  <FileDropzone
+                    folder="notes"
+                    maxSizeMB={20}
+                    allowedExtensions={["pdf", "doc", "docx", "ppt", "pptx", "txt", "jpg", "jpeg", "png"]}
+                    onUploadComplete={(file) => setAttachedFiles(prev => [...prev, file])}
                   />
                 </div>
                 <div className="flex gap-3 pt-2">

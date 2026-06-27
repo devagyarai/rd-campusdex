@@ -2,5 +2,11 @@
   "version": 2,
   "buildCommand": "npx prisma@5 generate && npx prisma@5 db push --accept-data-loss && next build",
   "installCommand": "npm install --legacy-peer-deps",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/cleanup-audit-logs",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }

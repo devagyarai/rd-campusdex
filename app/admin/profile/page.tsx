@@ -10,6 +10,8 @@ import { User, Lock, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { useForm } from "react-hook-form";
+import { FileDropzone } from "@/components/upload/FileDropzone";
+import Image from "next/image";
 
 interface AdminProfileData {
   firstName: string;
@@ -23,6 +25,7 @@ interface AdminProfileData {
 export default function AdminProfilePage() {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showUploader, setShowUploader] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
 
   const { register, handleSubmit, reset } = useForm<AdminProfileData>();
@@ -64,6 +67,28 @@ export default function AdminProfilePage() {
     finally { setLoading(false); }
   };
 
+  const handleUploadComplete = async (fileData: any) => {
+    try {
+      const res = await fetch("/api/admin/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          profileImage: fileData.secureUrl,
+          profileImageId: fileData.id
+        }),
+      });
+      if (res.ok) {
+        toast.success("Profile picture updated");
+        setShowUploader(false);
+        refreshUser();
+      } else {
+        toast.error("Failed to save profile picture to database.");
+      }
+    } catch {
+      toast.error("An error occurred while saving the profile picture.");
+    }
+  };
+
   const onPasswordSubmit = async (data: { currentPassword: string; newPassword: string; confirmPassword: string }) => {
     if (data.newPassword !== data.confirmPassword) {
       toast.error("Passwords do not match");
@@ -100,8 +125,21 @@ export default function AdminProfilePage() {
       {/* Profile Card */}
       <div className="rounded-xl border bg-card p-6 mb-6">
         <div className="flex items-center gap-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-            {initials}
+          <div className="relative shrink-0">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg overflow-hidden">
+              {profile?.profileImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.profileImage} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
+            </div>
+            <button 
+              onClick={() => setShowUploader(true)}
+              className="absolute -bottom-2 -right-2 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity shadow-lg"
+            >
+              <User className="w-4 h-4" />
+            </button>
           </div>
           <div>
             <h2 className="text-xl font-bold">
@@ -194,6 +232,30 @@ export default function AdminProfilePage() {
             </button>
           </form>
         </motion.div>
+      )}
+    {showUploader && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[var(--background)] rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col"
+          >
+            <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
+              <h3 className="font-semibold text-[var(--text-primary)]">Upload Profile Picture</h3>
+              <button onClick={() => setShowUploader(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <FileDropzone 
+                folder="profiles" 
+                maxSizeMB={5}
+                allowedExtensions={["jpg", "jpeg", "png", "webp"]}
+                onUploadComplete={handleUploadComplete}
+              />
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

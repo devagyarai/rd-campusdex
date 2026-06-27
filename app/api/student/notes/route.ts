@@ -16,6 +16,7 @@ export async function GET() {
 
     const notes = await db.note.findMany({
       where: { studentId: student.id },
+      include: { files: true },
       orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
     });
 
@@ -42,7 +43,11 @@ export async function POST(req: NextRequest) {
         category: body.category || "LECTURE",
         tags: body.tags,
         studentId: student.id,
+        files: body.fileIds && body.fileIds.length > 0 ? {
+          connect: body.fileIds.map((id: string) => ({ id }))
+        } : undefined
       },
+      include: { files: true }
     });
 
     return NextResponse.json(note, { status: 201 });

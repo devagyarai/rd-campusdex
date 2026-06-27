@@ -25,10 +25,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         studentId: student.id,
         status: body.status,
         submittedAt: body.status === "COMPLETED" ? new Date() : null,
+        fileId: body.fileId,
       },
       update: {
         status: body.status,
         submittedAt: body.status === "COMPLETED" ? new Date() : undefined,
+        fileId: body.fileId !== undefined ? body.fileId : undefined,
       },
     });
 

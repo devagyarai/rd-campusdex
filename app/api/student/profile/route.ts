@@ -25,6 +25,7 @@ export async function PUT(req: NextRequest) {
         gender: body.gender,
         dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : undefined,
         profileImage: body.profileImage,
+        profileImageId: body.profileImageId,
         semester: body.semester ? parseInt(body.semester) : undefined,
       },
     });
