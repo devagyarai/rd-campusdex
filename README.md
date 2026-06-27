@@ -255,9 +255,9 @@ rd-campusdex/
    *(Ensure `DATABASE_URL` points to your MySQL database).*
 
 4. **Initialize Database:**
-   Push the schema to your database and generate the Prisma client.
+   Run migrations and generate the Prisma client.
    ```bash
-   npx prisma db push
+   npx prisma migrate deploy
    npx prisma generate
    ```
 

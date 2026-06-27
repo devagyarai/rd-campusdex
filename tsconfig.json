@@ -37,6 +37,15 @@
     "**/*.mts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "tests",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "playwright.config.ts",
+    "vitest.config.ts",
+    "tests/vitest.setup.ts",
+    "stryker.conf.json"
   ]
 }
